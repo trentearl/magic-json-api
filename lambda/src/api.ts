@@ -9,7 +9,7 @@ const { MAGIC_API_OPENAI_API_KEY } = z
   .parse(process.env);
 
 const configuration = new Configuration({
-  apiKey: MAGIC_API_OPENAI_API_KEY
+  apiKey: MAGIC_API_OPENAI_API_KEY,
 });
 
 export const AiLib = new OpenAIApi(configuration);
@@ -17,16 +17,19 @@ export const AiLib = new OpenAIApi(configuration);
 export const index = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
-  console.log(JSON.stringify(event, null, 2));
   const axiosResponse = await AiLib.createCompletion({
     model: "text-davinci-003",
-    prompt: `you are a generic json api. you have limits of 3 items write the data for ${event.path}`,
+    prompt: `you are a generic json api.
+      you have a limit of 3 items,
+      write the data for ${event.path}.
+      be very brief.
+      you have 10 seconds to complete this task.
+    `,
     temperature: 0,
     max_tokens: 500,
   });
 
   const response: CreateCompletionResponse = axiosResponse.data;
-  console.log(JSON.stringify(response, null, 2));
   const choices = response.choices;
 
   if (!choices[0].text) {
